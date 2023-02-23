@@ -56,7 +56,7 @@ public class InMemoryItemRepository implements ItemRepository {
     @Override
     public Item update(Long userId, Item item) {
         Item updateItem = getById(item.getId());
-        if (updateItem.getOwner() != userId || updateItem.getId() != item.getId()) {
+        if (!updateItem.getOwner().equals(userId) || !updateItem.getId().equals(item.getId())) {
             throw new ItemRepositoryException("эта вещь недоступна для редактирования");
         }
         Optional.ofNullable(item.getName()).ifPresent(updateItem::setName);

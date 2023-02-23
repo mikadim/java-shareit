@@ -35,7 +35,7 @@ public class InMemoryUserRepository implements UserRepository {
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
             isEmailExist(user.getEmail())
                     .ifPresent(u -> {
-                        if (u.getId() != updatedUser.getId()) {
+                        if (!u.getId().equals(updatedUser.getId())) {
                             throw new UserRepositoryException(user.getEmail() + ": этот ящик уже использовался");
                         }
                     });
