@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 class ErrorHandler {
 
     @ExceptionHandler(UserRepositoryException.class)
-    public ResponseEntity<String> UserRepositoryHandler(final RuntimeException e) {
+    public ResponseEntity<String> userRepositoryHandler(final RuntimeException e) {
         log.debug(e.getMessage());
         if (StringUtils.containsIgnoreCase(e.getMessage(), "ящик уже использовался")) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
