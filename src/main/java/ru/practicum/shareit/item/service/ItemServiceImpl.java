@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -20,9 +22,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Long userId, ItemDto dto) {
-        if (dto.getAvailable() == null || dto.getAvailable().equals(false) ||
-                dto.getName() == null || dto.getName().isBlank() ||
-                dto.getDescription() == null || dto.getDescription().isBlank()) {
+        if (BooleanUtils.isNotTrue(dto.getAvailable()) || StringUtils.isBlank(dto.getName()) ||
+                StringUtils.isBlank(dto.getDescription())) {
             throw new ItemServiceException("недопустимые свойства вещи");
         }
         Item item = itemMapper.toItem(dto);

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -18,8 +19,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(UserDto dto) {
-        if (dto.getEmail() == null || dto.getEmail().isBlank() ||
-                dto.getName() == null || dto.getName().isBlank()) {
+        if (StringUtils.isBlank(dto.getEmail()) || StringUtils.isBlank(dto.getName())) {
             throw new UserServiceException("поля name и/или description не заполнены");
         }
         return userMapper.toDto(repository.create(userMapper.toUser(dto)));

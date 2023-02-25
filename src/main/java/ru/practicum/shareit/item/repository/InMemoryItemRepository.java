@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import ru.practicum.shareit.item.exception.ItemRepositoryException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -37,10 +38,11 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public List<Item> getByText(String text) {
-        final String prepText = text.trim().toLowerCase();
+        final String prepText = text.trim();
         return items.values().stream()
                 .filter(i -> i.getAvailable().equals(true) &&
-                        (i.getName().trim().toLowerCase().contains(prepText) || i.getDescription().trim().toLowerCase().contains(prepText)))
+                        (StringUtils.containsIgnoreCase(i.getName(), prepText) || StringUtils
+                                .containsIgnoreCase(i.getDescription(), prepText)))
                 .collect(Collectors.toList());
     }
 

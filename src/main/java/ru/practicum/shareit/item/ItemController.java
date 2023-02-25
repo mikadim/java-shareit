@@ -18,15 +18,16 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
+    public static final String USER_ID_TAG = "X-Sharer-User-Id";
 
     @PostMapping
-    public ResponseEntity<ItemDto> createItem(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId,
+    public ResponseEntity<ItemDto> createItem(@RequestHeader(USER_ID_TAG) @NotNull Long userId,
                                               @RequestBody @NotNull ItemDto dto) {
         return new ResponseEntity<>(itemService.create(userId, dto), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ItemDto> updateItem(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId,
+    public ResponseEntity<ItemDto> updateItem(@RequestHeader(USER_ID_TAG) @NotNull Long userId,
                                               @PathVariable("id") Long itemId,
                                               @RequestBody @NotNull ItemDto dto) {
         return new ResponseEntity<>(itemService.update(userId, itemId, dto), HttpStatus.OK);
@@ -38,7 +39,7 @@ public class ItemController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<ItemDto>> getItems(@RequestHeader("X-Sharer-User-Id") @NotNull Long userId) {
+    public ResponseEntity<List<ItemDto>> getItems(@RequestHeader(USER_ID_TAG) @NotNull Long userId) {
         return new ResponseEntity<>(itemService.getByUserId(userId), HttpStatus.OK);
     }
 

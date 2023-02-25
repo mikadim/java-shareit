@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import ru.practicum.shareit.user.exception.UserRepositoryException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utils.IdGenerator;
@@ -32,7 +33,7 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User update(User user) {
         User updatedUser = getById(user.getId());
-        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+        if (StringUtils.isNotBlank(user.getEmail())) {
             isEmailExist(user.getEmail())
                     .ifPresent(u -> {
                         if (!u.getId().equals(updatedUser.getId())) {
@@ -41,7 +42,7 @@ public class InMemoryUserRepository implements UserRepository {
                     });
             updatedUser.setEmail(user.getEmail());
         }
-        if (user.getName() != null && !user.getName().isBlank()) {
+        if (StringUtils.isNotBlank(user.getName())) {
             updatedUser.setName(user.getName());
         }
         log.info("Данные пользователя обновлены: {}", updatedUser.toString());
