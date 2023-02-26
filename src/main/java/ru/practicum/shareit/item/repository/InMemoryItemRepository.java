@@ -38,11 +38,11 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public List<Item> getByText(String text) {
-        final String prepText = text.trim();
+        final String prepareTest = text.trim();
         return items.values().stream()
                 .filter(i -> i.getAvailable().equals(true) &&
-                        (StringUtils.containsIgnoreCase(i.getName(), prepText) || StringUtils
-                                .containsIgnoreCase(i.getDescription(), prepText)))
+                        (StringUtils.containsIgnoreCase(i.getName(), prepareTest) || StringUtils
+                                .containsIgnoreCase(i.getDescription(), prepareTest)))
                 .collect(Collectors.toList());
     }
 
