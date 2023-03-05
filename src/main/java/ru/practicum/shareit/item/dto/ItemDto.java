@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
-import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.booking.dto.BookingForItemDto;
+import ru.practicum.shareit.booking.model.*;
 
 @Data
 public class ItemDto {
@@ -9,5 +10,7 @@ public class ItemDto {
     private String name;
     private String description;
     private Boolean available;
-    private ItemRequest request;
+    private Long request;
+    private BookingForItemDto lastBooking;
+    private BookingForItemDto nextBooking;
 }

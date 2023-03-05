@@ -4,21 +4,36 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingForItemDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.exception.ItemServiceException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
+    private final BookingRepository bookingRepository;
+
+    @Autowired
+    public ItemServiceImpl(@Qualifier("itemDbStorage") ItemRepository itemRepository, ItemMapper itemMapper,
+                           BookingRepository bookingRepository) {
+        this.itemRepository = itemRepository;
+        this.itemMapper = itemMapper;
+        this.bookingRepository = bookingRepository;
+    }
 
     @Override
     public ItemDto create(Long userId, ItemDto dto) {
@@ -40,12 +55,25 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getById(Long itemId) {
-        return itemMapper.toDto(itemRepository.getById(itemId));
+        ItemDto itemDto = itemMapper.toDto(itemRepository.getById(itemId));
+        List<BookingForItemDto> itemBooking = bookingRepository.findByItemId(itemId);
+        itemBooking.stream()
+                .filter((BookingForItemDto i) -> i.getEnd().isBefore(LocalDateTime.now()))
+                .max(Comparator.comparing(BookingForItemDto::getEnd))
+                .ifPresent(itemDto::setLastBooking);
+        itemBooking.stream()
+                .filter(i -> i.getStart().isAfter(LocalDateTime.now()))
+                .min(Comparator.comparing(BookingForItemDto::getStart))
+                .ifPresent(itemDto::setNextBooking);
+        return itemDto;
     }
 
     @Override
     public List<ItemDto> getByUserId(Long userId) {
-        return itemMapper.toDtoItems(itemRepository.getByUserId(userId));
+        List<ItemDto> itemDtos = itemMapper.toDtoItems(itemRepository.getByUserId(userId));
+
+
+        return itemDtos;
     }
 
     @Override

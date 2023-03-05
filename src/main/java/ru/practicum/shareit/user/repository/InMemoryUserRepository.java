@@ -31,7 +31,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User update(User user) {
+    public User save(User user) {
         User updatedUser = getById(user.getId());
         if (StringUtils.isNotBlank(user.getEmail())) {
             isEmailExist(user.getEmail())
@@ -66,7 +66,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public List<User> getAll() {
+    public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 
