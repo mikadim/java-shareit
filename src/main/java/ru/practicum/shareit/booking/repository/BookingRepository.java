@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.model.ItemStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,5 +21,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     public List<Booking> findByItemOwner(Long ownerId);
 
-    public List<BookingForItemDto> findByItemId(Long itemId);
+    @Query(" select b from Booking b " +
+            "inner join b.item i " +
+            "where i.id = ?1 and i.owner = ?2")
+    public List<BookingForItemDto> findByItemId(Long itemId, Long userId);
+
+    public List<Booking> findByItemIdAndBookerId(Long itemId, Long bookerId);
 }

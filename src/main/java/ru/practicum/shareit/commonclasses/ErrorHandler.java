@@ -6,6 +6,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import ru.practicum.shareit.booking.BookingController;
 import ru.practicum.shareit.booking.exception.BookingServiceException;
 import ru.practicum.shareit.item.ItemController;
+import ru.practicum.shareit.item.exception.CommentServiceException;
 import ru.practicum.shareit.item.exception.ItemRepositoryException;
 import ru.practicum.shareit.item.exception.ItemServiceException;
 import ru.practicum.shareit.user.UserController;
@@ -76,6 +77,12 @@ class ErrorHandler {
             return new ResponseEntity<>(Map.of("error", "Unknown state: " + e.getValue().toString()), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CommentServiceException.class)
+    public ResponseEntity<String> commentServiceHandler(final RuntimeException e) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
 

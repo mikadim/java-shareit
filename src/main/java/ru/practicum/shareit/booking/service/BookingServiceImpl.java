@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking updateStatus(Long ownerId, Long bookingId, Boolean status) {
         Booking booking = bookingRepository.findByIdAndItemOwner(bookingId, ownerId)
-                .orElseThrow(() -> new BookingServiceException("нет доступа для смены статуса"));
+                .orElseThrow(() -> new BookingServiceException("нет доступа для изменения статуса"));
         if (booking.getStatus().equals(ItemStatus.APPROVED)) {
             throw new BookingServiceException("статус утверждено, изменение запрещено");
         }
@@ -98,12 +98,12 @@ public class BookingServiceImpl implements BookingService {
         for (Booking b : bookings) {
             switch (status) {
                 case CURRENT:
-                    if (b.getStart().isAfter(LocalDateTime.now()) && b.getEnd().isBefore(LocalDateTime.now())) {
+                    if (b.getStart().isBefore(LocalDateTime.now()) && b.getEnd().isAfter(LocalDateTime.now())) {
                         bookingsForReturn.add(b);
                     }
                     break;
                 case PAST:
-                    if (b.getEnd().isAfter(LocalDateTime.now())) {
+                    if (b.getEnd().isBefore(LocalDateTime.now())) {
                         bookingsForReturn.add(b);
                     }
                     break;
@@ -130,6 +130,4 @@ public class BookingServiceImpl implements BookingService {
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .collect(Collectors.toList());
     }
-
-
 }

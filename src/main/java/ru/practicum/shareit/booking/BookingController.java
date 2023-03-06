@@ -50,7 +50,6 @@ public class BookingController {
     @GetMapping()
     public ResponseEntity<List<Booking>> getBookerBookings(@RequestHeader(BOOKER_ID_TAG) @NotNull Long userId,
                                                          @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status) {
-        System.out.println(status);
         return new ResponseEntity<>(bookingService.getBookerBookings(userId, status), HttpStatus.OK);
     }
 

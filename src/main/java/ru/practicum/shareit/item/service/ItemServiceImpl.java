@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +9,18 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.exception.CommentServiceException;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.exception.ItemServiceException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemStatus;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,18 +28,26 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
+    private final UserRepository userRepository;
 
     @Autowired
     public ItemServiceImpl(@Qualifier("itemDbStorage") ItemRepository itemRepository, ItemMapper itemMapper,
-                           BookingRepository bookingRepository) {
+                           BookingRepository bookingRepository, CommentRepository commentRepository,
+                           CommentMapper commentMapper, @Qualifier("dbStorage") UserRepository userRepository) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
+        this.commentMapper = commentMapper;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -54,26 +69,34 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getById(Long itemId) {
+    public ItemDto getById(Long itemId, Long userId) {
         ItemDto itemDto = itemMapper.toDto(itemRepository.getById(itemId));
-        List<BookingForItemDto> itemBooking = bookingRepository.findByItemId(itemId);
+        prepareDto(itemId, userId, itemDto);
+        return itemDto;
+    }
+
+    private void prepareDto(Long itemId, Long userId, ItemDto itemDto) {
+        List<BookingForItemDto> itemBooking = bookingRepository.findByItemId(itemId, userId);
         itemBooking.stream()
-                .filter((BookingForItemDto i) -> i.getEnd().isBefore(LocalDateTime.now()))
+                .filter(i -> i.getEnd().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
                 .max(Comparator.comparing(BookingForItemDto::getEnd))
                 .ifPresent(itemDto::setLastBooking);
         itemBooking.stream()
-                .filter(i -> i.getStart().isAfter(LocalDateTime.now()))
+                .filter(i -> i.getStart().isAfter(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
                 .min(Comparator.comparing(BookingForItemDto::getStart))
                 .ifPresent(itemDto::setNextBooking);
-        return itemDto;
+        itemDto.setComments(commentMapper.toDto(commentRepository.findByItemId(itemId)));
     }
 
     @Override
     public List<ItemDto> getByUserId(Long userId) {
         List<ItemDto> itemDtos = itemMapper.toDtoItems(itemRepository.getByUserId(userId));
-
-
-        return itemDtos;
+        for (ItemDto dto : itemDtos) {
+            prepareDto(dto.getId(), userId, dto);
+        }
+        return itemDtos.stream()
+                .sorted(Comparator.comparing(ItemDto::getId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -82,5 +105,20 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
         return itemMapper.toDtoItems(itemRepository.getByText(text));
+    }
+
+    @Override
+    public CommentDto createComment(Long authorId, Long itemId, CommentDto dto) {
+        List<Booking> bookings = bookingRepository.findByItemIdAndBookerId(itemId, authorId).stream().
+                filter(b -> b.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+        if (bookings.isEmpty()) {
+            throw new CommentServiceException("отзыв на эту вещь добавить невозможно");
+        }
+        Comment comment = commentMapper.toComment(dto);
+        comment.setItem(itemRepository.getById(itemId));
+        comment.setAuthor(userRepository.getById(authorId));
+        commentRepository.save(comment);
+        log.info("Комментарий добавлен: {}", comment.toString());
+        return commentMapper.toDto(comment);
     }
 }

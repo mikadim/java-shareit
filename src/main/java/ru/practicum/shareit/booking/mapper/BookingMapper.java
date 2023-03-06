@@ -10,8 +10,4 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 public interface BookingMapper {
     @Mapping(target = "status", expression = "java(ru.practicum.shareit.item.model.ItemStatus.WAITING)")
     Booking toNewBooking(BookingDto dto);
-//
-//    @Mapping(target = "BookingStatusDto", expression = "java(ru.practicum.shareit.booking.dto.BookingStatusDto.of(status.trim().toUpperCase())")
-//    BookingStatusDto toBookingStatusDto(String status);
-
 }
