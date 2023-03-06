@@ -38,14 +38,14 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public Item save(Item item) {
         userRepository.getById(item.getOwner());
-        Item newItem= itemRepositoryJpa.save(item);
+        Item newItem = itemRepositoryJpa.save(item);
         log.info("Добавлена новая вещь: {}", newItem.toString());
         return newItem;
     }
 
     @Override
     public Item update(Long userId, Item item) {
-        Item itemForUpdate= getById(item.getId());
+        Item itemForUpdate = getById(item.getId());
         if (!itemForUpdate.getOwner().equals(userId) || !itemForUpdate.getId().equals(item.getId())) {
             throw new ItemRepositoryException("эта вещь недоступна для редактирования");
         }

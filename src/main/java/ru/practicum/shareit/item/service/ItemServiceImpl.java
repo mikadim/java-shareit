@@ -109,8 +109,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(Long authorId, Long itemId, CommentDto dto) {
-        List<Booking> bookings = bookingRepository.findByItemIdAndBookerId(itemId, authorId).stream().
-                filter(b -> b.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+        List<Booking> bookings = bookingRepository.findByItemIdAndBookerId(itemId, authorId).stream()
+                .filter(b -> b.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
         if (bookings.isEmpty()) {
             throw new CommentServiceException("отзыв на эту вещь добавить невозможно");
         }

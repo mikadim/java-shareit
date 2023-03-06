@@ -21,7 +21,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User create(User user) {
-        User newUser= userRepositoryJpa.save(user);
+        User newUser = userRepositoryJpa.save(user);
         log.info("Добавлен новый пользователь: {}", newUser.toString());
         return newUser;
     }
@@ -50,8 +50,10 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void deleteById(Long userId) {
-        userRepositoryJpa.findById(userId).ifPresent(u -> {userRepositoryJpa.deleteById(userId);
-            log.info("Пользователь удален: {}", u.toString());});
+        userRepositoryJpa.findById(userId).ifPresent(u -> {
+            userRepositoryJpa.deleteById(userId);
+            log.info("Пользователь удален: {}", u.toString());
+        });
     }
 
     @Override
