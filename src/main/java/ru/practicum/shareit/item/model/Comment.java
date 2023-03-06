@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import ru.practicum.shareit.user.model.*;
 
 @Entity
-@Table(name = "comments", schema = "public")
+@Table(name = "comments")
 @Data
 public class Comment {
     @Id

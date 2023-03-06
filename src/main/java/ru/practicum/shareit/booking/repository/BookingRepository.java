@@ -21,10 +21,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     public List<Booking> findByItemOwner(Long ownerId);
 
-    @Query(" select b from Booking b " +
-            "inner join b.item i " +
-            "where i.id = ?1 and i.owner = ?2")
-    public List<BookingForItemDto> findByItemId(Long itemId, Long userId);
+    public List<BookingForItemDto> findByItemIdAndItemOwner(Long itemId, Long userId);
 
     public List<Booking> findByItemIdAndBookerId(Long itemId, Long bookerId);
 }

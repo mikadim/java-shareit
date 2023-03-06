@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 @BookingDtoValid
 @Data
 public class BookingDto {
-    Long itemId;
+    private Long itemId;
     @FutureOrPresent
-    LocalDateTime start;
+    private LocalDateTime start;
     @FutureOrPresent
-    LocalDateTime end;
+    private LocalDateTime end;
 }

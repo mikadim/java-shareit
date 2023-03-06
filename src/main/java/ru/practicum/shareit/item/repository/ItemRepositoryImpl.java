@@ -83,6 +83,4 @@ public class ItemRepositoryImpl implements ItemRepository {
         criteriaQuery.select(root).where(cb.and(available, likeText));
         return entityManager.createQuery(criteriaQuery).getResultList();
     }
-
-
 }

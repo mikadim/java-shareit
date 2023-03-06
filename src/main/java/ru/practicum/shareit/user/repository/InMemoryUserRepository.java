@@ -71,6 +71,6 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     private Optional<User> isEmailExist(String email) {
-        return users.values().stream().filter(u -> u.getEmail().equals(email)).findFirst();
+        return users.values().stream().filter(user -> user.getEmail().equals(email)).findFirst();
     }
 }

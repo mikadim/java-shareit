@@ -76,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void prepareDto(Long itemId, Long userId, ItemDto itemDto) {
-        List<BookingForItemDto> itemBooking = bookingRepository.findByItemId(itemId, userId);
+        List<BookingForItemDto> itemBooking = bookingRepository.findByItemIdAndItemOwner(itemId, userId);
         itemBooking.stream()
                 .filter(i -> i.getEnd().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
                 .max(Comparator.comparing(BookingForItemDto::getEnd))
@@ -110,7 +110,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDto createComment(Long authorId, Long itemId, CommentDto dto) {
         List<Booking> bookings = bookingRepository.findByItemIdAndBookerId(itemId, authorId).stream()
-                .filter(b -> b.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).collect(Collectors.toList());
         if (bookings.isEmpty()) {
             throw new CommentServiceException("отзыв на эту вещь добавить невозможно");
         }

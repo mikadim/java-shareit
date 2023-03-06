@@ -57,7 +57,7 @@ public class BookingServiceImpl implements BookingService {
     public Booking updateStatus(Long ownerId, Long bookingId, Boolean status) {
         Booking booking = bookingRepository.findByIdAndItemOwner(bookingId, ownerId)
                 .orElseThrow(() -> new BookingServiceException("нет доступа для изменения статуса"));
-        if (booking.getStatus().equals(ItemStatus.APPROVED)) {
+        if (booking.getStatus() == ItemStatus.APPROVED) {
             throw new BookingServiceException("статус утверждено, изменение запрещено");
         }
         if (status.equals(true)) {
@@ -95,35 +95,35 @@ public class BookingServiceImpl implements BookingService {
 
     private static List<Booking> getBookings(BookingStatusDto status, List<Booking> bookings) {
         List<Booking> bookingsForReturn = new ArrayList<>();
-        for (Booking b : bookings) {
+        for (Booking booking : bookings) {
             switch (status) {
                 case CURRENT:
-                    if (b.getStart().isBefore(LocalDateTime.now()) && b.getEnd().isAfter(LocalDateTime.now())) {
-                        bookingsForReturn.add(b);
+                    if (booking.getStart().isBefore(LocalDateTime.now()) && booking.getEnd().isAfter(LocalDateTime.now())) {
+                        bookingsForReturn.add(booking);
                     }
                     break;
                 case PAST:
-                    if (b.getEnd().isBefore(LocalDateTime.now())) {
-                        bookingsForReturn.add(b);
+                    if (booking.getEnd().isBefore(LocalDateTime.now())) {
+                        bookingsForReturn.add(booking);
                     }
                     break;
                 case FUTURE:
-                    if (b.getStart().isAfter(LocalDateTime.now())) {
-                        bookingsForReturn.add(b);
+                    if (booking.getStart().isAfter(LocalDateTime.now())) {
+                        bookingsForReturn.add(booking);
                     }
                     break;
                 case WAITING:
-                    if (b.getStatus().equals(ItemStatus.WAITING)) {
-                        bookingsForReturn.add(b);
+                    if (booking.getStatus() == ItemStatus.WAITING) {
+                        bookingsForReturn.add(booking);
                     }
                     break;
                 case REJECTED:
-                    if (b.getStatus().equals(ItemStatus.REJECTED)) {
-                        bookingsForReturn.add(b);
+                    if (booking.getStatus() == ItemStatus.REJECTED) {
+                        bookingsForReturn.add(booking);
                     }
                     break;
                 default:
-                    bookingsForReturn.add(b);
+                    bookingsForReturn.add(booking);
             }
         }
         return bookingsForReturn.stream()

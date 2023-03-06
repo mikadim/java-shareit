@@ -46,9 +46,9 @@ public class InMemoryItemRepository implements ItemRepository {
     public List<Item> getByText(String text) {
         final String prepareTest = text.trim();
         return items.values().stream()
-                .filter(i -> i.getAvailable().equals(true) &&
-                        (StringUtils.containsIgnoreCase(i.getName(), prepareTest) || StringUtils
-                                .containsIgnoreCase(i.getDescription(), prepareTest)))
+                .filter(item -> item.getAvailable().equals(true) &&
+                        (StringUtils.containsIgnoreCase(item.getName(), prepareTest) || StringUtils
+                                .containsIgnoreCase(item.getDescription(), prepareTest)))
                 .collect(Collectors.toList());
     }
 

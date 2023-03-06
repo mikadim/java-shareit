@@ -1,13 +1,11 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.*;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
@@ -20,13 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
-    BookingService bookingService;
+    private final BookingService bookingService;
     public static final String BOOKER_ID_TAG = "X-Sharer-User-Id";
-
-    @Autowired
-    public BookingController(BookingService bookingService, BookingMapper bookingMapper) {
-        this.bookingService = bookingService;
-    }
 
     @PostMapping
     public ResponseEntity<Booking> crateBooking(@RequestHeader(BOOKER_ID_TAG) @NotNull Long bookerId,
@@ -47,7 +40,7 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.getStatus(userId, bookingId), HttpStatus.OK);
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<Booking>> getBookerBookings(@RequestHeader(BOOKER_ID_TAG) @NotNull Long userId,
                                                          @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status) {
         return new ResponseEntity<>(bookingService.getBookerBookings(userId, status), HttpStatus.OK);
