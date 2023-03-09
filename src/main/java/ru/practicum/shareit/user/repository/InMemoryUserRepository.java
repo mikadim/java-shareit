@@ -31,7 +31,7 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public User update(User user) {
+    public User save(User user) {
         User updatedUser = getById(user.getId());
         if (StringUtils.isNotBlank(user.getEmail())) {
             isEmailExist(user.getEmail())
@@ -66,11 +66,11 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     @Override
-    public List<User> getAll() {
+    public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 
     private Optional<User> isEmailExist(String email) {
-        return users.values().stream().filter(u -> u.getEmail().equals(email)).findFirst();
+        return users.values().stream().filter(user -> user.getEmail().equals(email)).findFirst();
     }
 }
