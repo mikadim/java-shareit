@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.exception.UserRepositoryException;
 import ru.practicum.shareit.user.model.User;
@@ -14,7 +13,7 @@ import java.util.List;
 public class UserRepositoryImpl implements UserRepository {
     private final UserRepositoryJpa userRepositoryJpa;
 
-    public UserRepositoryImpl(@Lazy UserRepositoryJpa userRepositoryJpa) {
+    public UserRepositoryImpl(UserRepositoryJpa userRepositoryJpa) {
         this.userRepositoryJpa = userRepositoryJpa;
     }
 

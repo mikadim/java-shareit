@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingForItemDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -37,17 +37,20 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final UserRepository userRepository;
+    private final BookingMapper bookingMapper;
 
     @Autowired
     public ItemServiceImpl(@Qualifier("itemDbStorage") ItemRepository itemRepository, ItemMapper itemMapper,
                            BookingRepository bookingRepository, CommentRepository commentRepository,
-                           CommentMapper commentMapper, @Qualifier("dbStorage") UserRepository userRepository) {
+                           CommentMapper commentMapper, @Qualifier("dbStorage") UserRepository userRepository,
+                           BookingMapper bookingMapper) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
         this.userRepository = userRepository;
+        this.bookingMapper = bookingMapper;
     }
 
     @Override
@@ -76,15 +79,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void prepareDto(Long itemId, Long userId, ItemDto itemDto) {
-        List<BookingForItemDto> itemBooking = bookingRepository.findByItemIdAndItemOwner(itemId, userId);
+        List<Booking> itemBooking = bookingRepository.findByItemIdAndItemOwner(itemId, userId);
         itemBooking.stream()
                 .filter(i -> i.getEnd().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
-                .max(Comparator.comparing(BookingForItemDto::getEnd))
-                .ifPresent(itemDto::setLastBooking);
+                .max(Comparator.comparing(Booking::getEnd))
+                .ifPresent(lastBooking -> itemDto.setLastBooking(bookingMapper.toBookingItemDto(lastBooking)));
         itemBooking.stream()
                 .filter(i -> i.getStart().isAfter(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
-                .min(Comparator.comparing(BookingForItemDto::getStart))
-                .ifPresent(itemDto::setNextBooking);
+                .min(Comparator.comparing(Booking::getStart))
+                .ifPresent(nextBooking -> itemDto.setNextBooking(bookingMapper.toBookingItemDto(nextBooking)));
         itemDto.setComments(commentMapper.toDto(commentRepository.findByItemId(itemId)));
     }
 

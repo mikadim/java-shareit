@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.exception.ItemRepositoryException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -27,7 +26,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     private EntityManager entityManager;
 
     @Autowired
-    public ItemRepositoryImpl(@Lazy ItemRepositoryJpa itemRepositoryJpa, @Qualifier("dbStorage") UserRepository userRepository,
+    public ItemRepositoryImpl(ItemRepositoryJpa itemRepositoryJpa, @Qualifier("dbStorage") UserRepository userRepository,
                               ItemMapper itemMapper, EntityManager entityManager) {
         this.itemRepositoryJpa = itemRepositoryJpa;
         this.userRepository = userRepository;
