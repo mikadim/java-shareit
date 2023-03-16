@@ -1,8 +1,9 @@
 package ru.practicum.shareit.item.repository;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import ru.practicum.shareit.item.exception.ItemRepositoryException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -14,12 +15,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
 @Repository
 public class InMemoryItemRepository implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
     private final UserRepository userRepository;
     private final IdGenerator idGenerator;
+
+    @Autowired
+    public InMemoryItemRepository(@Qualifier("dbStorage") UserRepository userRepository, IdGenerator idGenerator) {
+        this.userRepository = userRepository;
+        this.idGenerator = idGenerator;
+    }
 
     @Override
     public Item getById(Long itemId) {
@@ -38,11 +44,11 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public List<Item> getByText(String text) {
-        final String prepText = text.trim();
+        final String prepareTest = text.trim();
         return items.values().stream()
-                .filter(i -> i.getAvailable().equals(true) &&
-                        (StringUtils.containsIgnoreCase(i.getName(), prepText) || StringUtils
-                                .containsIgnoreCase(i.getDescription(), prepText)))
+                .filter(item -> item.getAvailable().equals(true) &&
+                        (StringUtils.containsIgnoreCase(item.getName(), prepareTest) || StringUtils
+                                .containsIgnoreCase(item.getDescription(), prepareTest)))
                 .collect(Collectors.toList());
     }
 
