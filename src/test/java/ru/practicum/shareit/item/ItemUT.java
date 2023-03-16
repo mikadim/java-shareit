@@ -48,7 +48,7 @@ public class ItemUT {
     void prepareDto() {
         Long itemId = 1L;
         Long userId = 1L;
-        Item item = new Item(1L, "testItem", "asdfsdaf", Boolean.TRUE, 1l, 1l);
+        Item item = new Item(1L, "testItem", "asdfsdaf", Boolean.TRUE, 1L, 1L);
         ItemDto itemDto = new ItemDto(itemId, "testName", "testDescription", Boolean.TRUE, null, null, null, null, null);
         Booking booking1 = new Booking(1L, LocalDateTime.now().minusDays(4), LocalDateTime.now().minusDays(3), item, null, APPROVED);
         Booking booking2 = new Booking(2L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(2), item, null, APPROVED);

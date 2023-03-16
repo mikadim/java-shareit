@@ -46,10 +46,10 @@ class ItemControllerIT {
     BookingItemDto lastBooking = new BookingItemDto(1L, 2L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(2), WAITING);
     BookingItemDto nextBooking = new BookingItemDto(2L, 2L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), WAITING);
     CommentDto comment = new CommentDto(1L, "test comment", "test", LocalDateTime.now());
-    ItemDto itemDto = new ItemDto(1L, "test", "super test", Boolean.TRUE, 2L, lastBooking
-            , nextBooking, List.of(comment), 2L);
-    ItemDto itemDto2 = new ItemDto(2L, "test2", "super test2", Boolean.TRUE, null, null
-            , null, null, null);
+    ItemDto itemDto = new ItemDto(1L, "test", "super test", Boolean.TRUE, 2L, lastBooking,
+            nextBooking, List.of(comment), 2L);
+    ItemDto itemDto2 = new ItemDto(2L, "test2", "super test2", Boolean.TRUE, null, null,
+            null, null, null);
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS");
 
     @SneakyThrows
