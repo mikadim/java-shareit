@@ -150,7 +150,7 @@ public class BookingServiceImpl implements BookingService {
             }
         }
         return bookingsForReturn.stream()
-                .sorted(Comparator.comparing(Booking::getStart))
+                .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .collect(Collectors.toList());
     }
 }
