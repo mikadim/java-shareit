@@ -9,7 +9,9 @@ public class BookingDtoValidator implements ConstraintValidator<BookingDtoValid,
 
     @Override
     public boolean isValid(BookingDto dto, ConstraintValidatorContext context) {
-        if (dto.getStart().isAfter(dto.getEnd())) {
+
+        if (dto.getStart() == null || dto.getEnd() == null || dto.getStart().isAfter(dto.getEnd()) ||
+                dto.getStart().isEqual(dto.getEnd())) {
             return false;
         }
         return true;

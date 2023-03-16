@@ -12,6 +12,8 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Validated
@@ -42,13 +44,17 @@ public class ItemController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<ItemDto>> getItems(@RequestHeader(USER_ID_TAG) @NotNull Long userId) {
-        return new ResponseEntity<>(itemService.getByUserId(userId), HttpStatus.OK);
+    public ResponseEntity<List<ItemDto>> getItems(@RequestHeader(USER_ID_TAG) @NotNull Long userId,
+                                                  @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                                  @RequestParam(name = "size", required = false) @Positive Integer size) {
+        return new ResponseEntity<>(itemService.getByUserId(userId, from, size), HttpStatus.OK);
     }
 
     @GetMapping("search")
-    public ResponseEntity<List<ItemDto>> searchItems(@RequestParam("text") String text) {
-        return new ResponseEntity<>(itemService.getByText(text), HttpStatus.OK);
+    public ResponseEntity<List<ItemDto>> searchItems(@RequestParam("text") String text,
+                                                     @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                                     @RequestParam(name = "size", required = false) @Positive Integer size) {
+        return new ResponseEntity<>(itemService.getByText(text, from, size), HttpStatus.OK);
     }
 
     @PostMapping("/{itemId}/comment")

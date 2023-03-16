@@ -3,6 +3,10 @@ package ru.practicum.shareit.booking.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatusDto;
@@ -80,16 +84,35 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookerBookings(Long userId, BookingStatusDto status) {
+    public List<Booking> getBookerBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
         userRepository.getById(userId);
-        List<Booking> bookings = bookingRepository.findByBookerId(userId);
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortByCreated = Sort.by(Sort.Direction.DESC, "start");
+            page = PageRequest.of(from / size, size, sortByCreated);
+        }
+        Page<Booking> bookingPage = bookingRepository.findByBookerId(userId, page);
+        List<Booking> bookings = new ArrayList<>();
+        bookingPage.getContent().forEach(bookings::add);
         return getBookings(status, bookings);
     }
 
     @Override
-    public List<Booking> getUserBookings(Long userId, BookingStatusDto status) {
+    public List<Booking> getUserBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
         userRepository.getById(userId);
-        List<Booking> bookings = bookingRepository.findByItemOwner(userId);
+
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortByCreated = Sort.by(Sort.Direction.DESC, "start");
+            page = PageRequest.of(from / size, size, sortByCreated);
+        }
+        Page<Booking> bookingPage = bookingRepository.findByItemOwner(userId, page);
+        List<Booking> bookings = new ArrayList<>();
+        bookingPage.getContent().forEach(bookings::add);
         return getBookings(status, bookings);
     }
 
@@ -127,7 +150,7 @@ public class BookingServiceImpl implements BookingService {
             }
         }
         return bookingsForReturn.stream()
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
+                .sorted(Comparator.comparing(Booking::getStart))
                 .collect(Collectors.toList());
     }
 }

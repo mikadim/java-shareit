@@ -5,6 +5,10 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -92,8 +96,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getByUserId(Long userId) {
-        List<ItemDto> itemDtos = itemMapper.toDtoItems(itemRepository.getByUserId(userId));
+    public List<ItemDto> getByUserId(Long userId, Integer from, Integer size) {
+
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortById = Sort.by(Sort.Direction.ASC, "id");
+            page = PageRequest.of(from / size, size, sortById);
+        }
+        Page<Item> itemPage = itemRepository.getByUserId(userId, page);
+        List<ItemDto> itemDtos = itemMapper.toDtoItems(itemPage.getContent());
         for (ItemDto dto : itemDtos) {
             prepareDto(dto.getId(), userId, dto);
         }
@@ -103,11 +116,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getByText(String text) {
+    public List<ItemDto> getByText(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemMapper.toDtoItems(itemRepository.getByText(text));
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortById = Sort.by(Sort.Direction.ASC, "id");
+            page = PageRequest.of(from / size, size, sortById);
+        }
+        Page<Item> itemPage = itemRepository.getByText(text, page);
+        return itemMapper.toDtoItems(itemPage.getContent());
     }
 
     @Override
