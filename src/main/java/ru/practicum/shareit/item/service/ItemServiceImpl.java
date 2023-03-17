@@ -85,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
     private void prepareDto(Long itemId, Long userId, ItemDto itemDto) {
         List<Booking> itemBooking = bookingRepository.findByItemIdAndItemOwner(itemId, userId);
         itemBooking.stream()
-                .filter(i -> i.getEnd().isBefore(LocalDateTime.now().plusSeconds(5)) && !i.getStatus().equals(ItemStatus.REJECTED))
+                .filter(i -> i.getStart().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
                 .max(Comparator.comparing(Booking::getEnd))
                 .ifPresent(lastBooking -> itemDto.setLastBooking(bookingMapper.toBookingItemDto(lastBooking)));
         itemBooking.stream()
