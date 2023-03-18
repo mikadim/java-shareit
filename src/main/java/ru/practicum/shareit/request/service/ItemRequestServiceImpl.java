@@ -89,6 +89,5 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequestDto itemRequestDto = itemRequestMapper.toItemRequestDto(itemRequest);
         itemRequestDto.setItems(itemMapper.toItemForItemRequestDto(itemRepository.getByRequest(itemRequest.getId())));
         return itemRequestDto;
-
     }
 }

@@ -49,7 +49,7 @@ class ItemRequestControllerIT {
     private ItemRequestDto itemRequestDto = new ItemRequestDto(1L, "веник", 2L, LocalDateTime.now(), new ArrayList<>());
     private ItemForItemRequestDto itemForItemRequestDto = new ItemForItemRequestDto(3L, "веник", "обычный веник", Boolean.TRUE, 1L);
     private ItemRequestDto itemRequestDto2 = new ItemRequestDto(2L, "совок", 2L, LocalDateTime.now(), new ArrayList<>());
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @SneakyThrows
     @Test

@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exception.UserRepositoryException;
 import ru.practicum.shareit.user.exception.UserServiceException;
@@ -17,13 +16,13 @@ import ru.practicum.shareit.user.service.UserService;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.hamcrest.core.Is.is;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserController.class)
 class UserControllerIT {
@@ -36,8 +35,8 @@ class UserControllerIT {
     @MockBean
     private UserService userService;
 
-    private UserDto userDto = new UserDto(1L, "user@mail.ru", "testUser");
-    private UserDto userDto2 = new UserDto(2L, "user2@mail.ru", "testUser2");
+    UserDto userDto = new UserDto(1L, "user@mail.ru", "testUser");
+    UserDto userDto2 = new UserDto(2L, "user2@mail.ru", "testUser2");
 
     @SneakyThrows
     @Test
@@ -46,7 +45,7 @@ class UserControllerIT {
         when(userService.getById(userId))
                 .thenThrow(new UserRepositoryException(userId + ": этот id не найден"));
 
-        mockMvc.perform(get("/users/{id}", userId)
+        mockMvc.perform(get("/add_users.sql/{id}", userId)
                         .accept(MediaType.ALL))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(userId + ": этот id не найден"));
@@ -62,7 +61,7 @@ class UserControllerIT {
         when(userService.getById(userId))
                 .thenReturn(userDto);
 
-        mockMvc.perform(get("/users/{id}", userId)
+        mockMvc.perform(get("/add_users.sql/{id}", userId)
                         .accept(MediaType.ALL))
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -80,7 +79,7 @@ class UserControllerIT {
     void deleteUser_whenDelete_thenStatusOk() {
         Long userId = 1L;
 
-        mockMvc.perform(delete("/users/{id}", userId)
+        mockMvc.perform(delete("/add_users.sql/{id}", userId)
                         .accept(MediaType.ALL))
                 .andExpect(status().isOk());
 
@@ -94,7 +93,7 @@ class UserControllerIT {
         when(userService.getAll())
                 .thenReturn(List.of(userDto, userDto2));
 
-        mockMvc.perform(get("/users")
+        mockMvc.perform(get("/add_users.sql")
                         .accept(MediaType.ALL))
                 .andExpectAll(status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -108,7 +107,7 @@ class UserControllerIT {
     @SneakyThrows
     @Test
     void createUser_whenDtoIsNull_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled() {
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/add_users.sql")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.ALL))
@@ -122,7 +121,7 @@ class UserControllerIT {
     void createUser_whenEmailIncorrect_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled() {
         UserDto newDto = new UserDto(3L, "abrakadabra", "user");
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/add_users.sql")
                         .content(objectMapper.writeValueAsString(newDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -138,7 +137,7 @@ class UserControllerIT {
         when(userService.create(any()))
                 .thenThrow(new UserServiceException("поля name и/или description не заполнены"));
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/add_users.sql")
                         .content(objectMapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -154,7 +153,7 @@ class UserControllerIT {
         when(userService.create(newDto))
                 .thenReturn(userDto);
 
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/add_users.sql")
                         .content("{\"name\": \"testUser\", \"email\": \"user@mail.ru\"}")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -171,13 +170,12 @@ class UserControllerIT {
     @Test
     void updateUserUser_whenCorrectRequest_thenStatusOk() {
         Long userId = 1L;
-        UserDto newDto = new UserDto();
-        newDto.setName("superTest");
-        UserDto userDto3 = new UserDto(userId, "test@mail.ru", newDto.getName());
+        UserDto newDto = new UserDto(null, "superTest", null);
+        UserDto userDto3 = new UserDto(userId, "test@mail.ru", "superTest");
         when(userService.update(userId, newDto))
                 .thenReturn(userDto3);
 
-        mockMvc.perform(patch("/users/{id}", userId)
+        mockMvc.perform(patch("/add_users.sql/{id}", userId)
                         .content("{\"name\": \"superTest\"}")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)

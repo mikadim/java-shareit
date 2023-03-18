@@ -48,12 +48,11 @@ class BookingControllerIT {
     @MockBean
     private BookingService bookingService;
 
-    Item item = new Item(2L, "пылесос", "хороший пылесос", Boolean.TRUE, 2L, 1L);
-    User booker = new User(1L, "test@mail.ru", "test");
-    Booking booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), item, booker, APPROVED);
-    Booking booking2 = new Booking(2L, LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4), item, booker, APPROVED);
-
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS");
+    private Item item = new Item(2L, "пылесос", "хороший пылесос", Boolean.TRUE, 2L, 1L);
+    private User booker = new User(1L, "test@mail.ru", "test");
+    private Booking booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), item, booker, APPROVED);
+    private Booking booking2 = new Booking(2L, LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4), item, booker, APPROVED);
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @SneakyThrows
     @Test

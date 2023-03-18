@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class UserDto {

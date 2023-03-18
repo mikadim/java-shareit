@@ -43,14 +43,15 @@ class ItemControllerIT {
     @MockBean
     private ItemService itemService;
 
-    BookingItemDto lastBooking = new BookingItemDto(1L, 2L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(2), WAITING);
-    BookingItemDto nextBooking = new BookingItemDto(2L, 2L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), WAITING);
-    CommentDto comment = new CommentDto(1L, "test comment", "test", LocalDateTime.now());
-    ItemDto itemDto = new ItemDto(1L, "test", "super test", Boolean.TRUE, 2L, lastBooking,
+    private BookingItemDto lastBooking = new BookingItemDto(1L, 2L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(2), WAITING);
+    private BookingItemDto nextBooking = new BookingItemDto(2L, 2L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), WAITING);
+    private CommentDto comment = new CommentDto(1L, "test comment", "test", LocalDateTime.now());
+    private ItemDto itemDto = new ItemDto(1L, "test", "super test", Boolean.TRUE, 2L, lastBooking,
             nextBooking, List.of(comment), 2L);
-    ItemDto itemDto2 = new ItemDto(2L, "test2", "super test2", Boolean.TRUE, null, null,
+    private ItemDto itemDto2 = new ItemDto(2L, "test2", "super test2", Boolean.TRUE, null, null,
             null, null, null);
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private DateTimeFormatter formatterForComments = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS");
 
     @SneakyThrows
     @Test
@@ -110,7 +111,8 @@ class ItemControllerIT {
                         jsonPath("$.comments[0].id").value(itemDto.getComments().get(0).getId()),
                         jsonPath("$.comments[0].text").value(itemDto.getComments().get(0).getText()),
                         jsonPath("$.comments[0].authorName").value(itemDto.getComments().get(0).getAuthorName()),
-                        jsonPath("$.comments[0].created").value(itemDto.getComments().get(0).getCreated().format(formatter)),
+                        jsonPath("$.comments[0].created").value(itemDto.getComments().get(0).getCreated()
+                                .format(formatterForComments)),
                         jsonPath("$.requestId", is(itemDto.getRequestId()), Long.class));
 
         verify(itemService, times(1)).getById(any(), any());
