@@ -2,6 +2,7 @@ package ru.practicum.shareit.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -52,8 +53,9 @@ class ItemRequestControllerIT {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     @SneakyThrows
+    @DisplayName("Запрос с отсутствующим заголовком REQUESTOR_ID_TAG возвращает статус BadRequest и метод getRequest не вызывается")
     @Test
-    void getUserRequest_whenRequestorIdHeaderIsNotExist_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled() {
+    void getUserRequest_whenRequestorIdHeaderIsNotExist() {
         Long requestId = 1L;
         mockMvc.perform(get("/requests/{requestId}", requestId)
                         .accept(MediaType.ALL))
@@ -64,8 +66,9 @@ class ItemRequestControllerIT {
 
     @ParameterizedTest(name = "{index}. requestorId = {arguments} ")
     @ValueSource(strings = {"", " ", "0", "-1"})
+    @DisplayName("Некорректный id автора запроса возвращает статус BadRequest и метод getRequest не вызывается")
     @SneakyThrows
-    void getUserRequest_whenRequestorIdIncorrect_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled(String requestorId) {
+    void getUserRequest_whenRequestorIdIncorrect(String requestorId) {
         Long requestId = 1L;
         mockMvc.perform(get("/requests/{requestId}", requestId)
                         .accept(MediaType.ALL)
@@ -77,8 +80,9 @@ class ItemRequestControllerIT {
 
     @ParameterizedTest(name = "{index}. requestId = {arguments} ")
     @ValueSource(strings = {"0", "-1"})
+    @DisplayName("Некорректный id запроса возвращает статус BadRequest и метод getRequest не вызывается")
     @SneakyThrows
-    void getUserRequest_whenRequestIdIncorrect_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled(String requestId) {
+    void getUserRequest_whenRequestIdIncorrect(String requestId) {
         Long requestorId = 1L;
         mockMvc.perform(get("/requests/{requestId}", requestId)
                         .accept(MediaType.ALL)
@@ -89,8 +93,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Запрос с несуществующим id возвращает статус NotFound и метод getRequest вызывается 1 раз")
     @Test
-    void getUserRequest_whenRequestIdNotFound_thenStatusNotFoundAndItemRequestServiceMethodCalledOnlyOnce() {
+    void getUserRequest_whenRequestIdNotFound() {
         Long requestId = 99L;
         Long requestorId = 1L;
         when(itemRequestService.getRequest(requestorId, requestId))
@@ -107,8 +112,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Запрос с несуществующим автором запроса возвращает статус NotFound и метод getRequest вызывается 1 раз")
     @Test
-    void getUserRequest_whenRequestorIdNotFound_thenStatusNotFoundAndItemRequestServiceMethodCalledOnlyOnce() {
+    void getUserRequest_whenRequestorIdNotFound() {
         Long requestId = 1L;
         Long requestorId = 99L;
         when(itemRequestService.getRequest(requestorId, requestId))
@@ -125,8 +131,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Запрос для которого отсутствуют вещи возвращает статус Ок и метод getRequest вызывается 1 раз")
     @Test
-    void getUserRequest_whenItemRequestExistAndItemListIsEmpty_thenStatusOkAndItemRequestServiceMethodCalledOnlyOnce() {
+    void getUserRequest_whenItemRequestExistAndItemListIsEmpty() {
         Long requestorId = 2L;
         Long requestId = 1L;
 
@@ -151,8 +158,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Запрос для которого есть список вещей возвращает статус Ok и метод getRequest вызывается 1 раз")
     @Test
-    void getUserRequest_whenItemRequestExistWithItemList_thenStatusOkAndItemRequestServiceMethodCalledOnlyOnce() {
+    void getUserRequest_whenItemRequestExistWithItemList() {
         Long requestorId = 2L;
         Long requestId = 1L;
         itemRequestDto.setItems(List.of(itemForItemRequestDto));
@@ -182,8 +190,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Запрос для которого есть список вещей возвращает статус Ok и метод getRequest вызывается 1 раз")
     @Test
-    void getUserRequests_whenItemsRequestsExistWithItemList_thenStatusOkAndItemRequestServiceMethodCalledOnlyOnce() {
+    void getUserRequests_whenItemsRequestsExistWithItemList() {
         Long requestorId = 2L;
         itemRequestDto.setItems(List.of(itemForItemRequestDto));
         when(itemRequestService.getUserRequests(requestorId))
@@ -203,8 +212,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("С несуществующим владелецем запроса возвращается NotFound и метод create вызывается 1 раз")
     @Test
-    void createRequest_whenRequestorIdNotFound_thenStatusNotFoundAndItemRequestServiceMethodCalledOnlyOnce() {
+    void createRequest_whenRequestorIdNotFound() {
         Long requestorId = 99L;
         when(itemRequestService.create(any(), any()))
                 .thenThrow(new UserRepositoryException(requestorId + ": этот id не найден"));
@@ -246,8 +256,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("При пустом описании возвращается статус BadRequest и метод create не вызывается")
     @Test
-    void createRequest_whenDescriptionIsNull_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled() {
+    void createRequest_whenDescriptionIsNull() {
         Long requestorId = 99L;
 
         mockMvc.perform(post("/requests")
@@ -263,8 +274,9 @@ class ItemRequestControllerIT {
 
     @ParameterizedTest(name = "{index}. size = {arguments} ")
     @ValueSource(strings = {"0", "-1"})
+    @DisplayName("При некорректном параметре пагинации size возвращается BadRequest и метод getAll не вызывается")
     @SneakyThrows
-    void getAllRequest_whenParamFromIncorrect_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled(String size) {
+    void getAllRequest_whenParamFromIncorrect(String size) {
         Long requestorId = 2L;
         String from = "0";
 
@@ -279,8 +291,9 @@ class ItemRequestControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("При некорректном параметре пагинации from возвращается BadRequest и метод getAll не вызывается")
     @Test
-    void getAllRequest_whenParamSizeIncorrect_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled() {
+    void getAllRequest_whenParamSizeIncorrect() {
         Long requestorId = 2L;
         String from = "-1";
         String size = "1";

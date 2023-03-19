@@ -2,12 +2,14 @@ package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
@@ -82,8 +84,9 @@ class ItemControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос возвращает статус ОК и метод getById вызывается один раз")
     @Test
-    void getItem_whenCorrectRequest_thenStatusOkAndItemServiceMethodCalledOnlyOnce() {
+    void getItem_whenCorrectRequest() {
         Long itemId = 1L;
         Long userId = 1L;
         when(itemService.getById(itemId, userId))
@@ -154,12 +157,13 @@ class ItemControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос возвращает статус ОК и метод getByUserId вызывается один раз")
     @Test
-    void getItems_whenCorrectRequest_thenStatusOkAndItemServiceMethodCalledOnlyOnce() {
+    void getItems_whenCorrectRequest() {
         Long userId = 1L;
         Integer size = 2;
         Integer from = 0;
-        when(itemService.getByUserId(userId, from, size)).thenReturn(List.of(itemDto, itemDto2));
+        when(itemService.getByUserId(userId, from, size)).thenReturn(new PageImpl<>(List.of(itemDto, itemDto2)));
 
         mockMvc.perform(get("/items")
                         .header(USER_ID_TAG, userId)
@@ -174,12 +178,13 @@ class ItemControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос возвращает статус ОК и метод getByText вызывается один раз")
     @Test
-    void searchItems_whenCorrectRequest_thenStatusOkAndItemServiceMethodCalledOnlyOnce() {
+    void searchItems_whenCorrectRequest() {
         Integer size = 2;
         Integer from = 0;
         String text = "test";
-        when(itemService.getByText(text, from, size)).thenReturn(List.of(itemDto, itemDto2));
+        when(itemService.getByText(text, from, size)).thenReturn(new PageImpl<>(List.of(itemDto, itemDto2)));
 
 
         mockMvc.perform(get("/items/search")
@@ -195,10 +200,11 @@ class ItemControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос c пагинацией возвращает статус ОК и метод getByText вызывается один раз")
     @Test
-    void searchItems_whenCorrectRequestWithoutFromAndSize_thenStatusOkAndItemServiceMethodCalledOnlyOnce() {
+    void searchItems_whenCorrectRequestWithoutFromAndSize() {
         String text = "test";
-        when(itemService.getByText(text, null, null)).thenReturn(List.of(itemDto, itemDto2));
+        when(itemService.getByText(text, null, null)).thenReturn(new PageImpl<>(List.of(itemDto, itemDto2)));
 
         mockMvc.perform(get("/items/search")
                         .param("text", text)
@@ -246,8 +252,9 @@ class ItemControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Post запрос с корректным body возвращает статус ОК и метод createComment вызывается один раз")
     @Test
-    void createComment_whenCorrectObject_thenStatusIsOkAndItemServiceMethodCalledOnlyOnce() {
+    void createComment_whenCorrectObject() {
         Long authorId = 1L;
         Long itemId = 1L;
         CommentDto commentDto = new CommentDto(null, "testText", "testUser", null);

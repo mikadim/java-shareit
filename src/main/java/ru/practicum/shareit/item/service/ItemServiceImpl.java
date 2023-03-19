@@ -5,10 +5,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -96,8 +93,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getByUserId(Long userId, Integer from, Integer size) {
-
+    public Page<ItemDto> getByUserId(Long userId, Integer from, Integer size) {
         Pageable page;
         if (size == null || from == null) {
             page = Pageable.unpaged();
@@ -110,15 +106,15 @@ public class ItemServiceImpl implements ItemService {
         for (ItemDto dto : itemDtos) {
             prepareDto(dto.getId(), userId, dto);
         }
-        return itemDtos.stream()
+        return new PageImpl<>(itemDtos.stream()
                 .sorted(Comparator.comparing(ItemDto::getId))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
-    public List<ItemDto> getByText(String text, Integer from, Integer size) {
+    public Page<ItemDto> getByText(String text, Integer from, Integer size) {
         if (text.isBlank()) {
-            return new ArrayList<>();
+            return new PageImpl<>(new ArrayList<>());
         }
         Pageable page;
         if (size == null || from == null) {
@@ -128,7 +124,7 @@ public class ItemServiceImpl implements ItemService {
             page = PageRequest.of(from / size, size, sortById);
         }
         Page<Item> itemPage = itemRepository.getByText(text, page);
-        return itemMapper.toDtoItems(itemPage.getContent());
+        return new PageImpl<>(itemMapper.toDtoItems(itemPage.getContent()));
     }
 
     @Override

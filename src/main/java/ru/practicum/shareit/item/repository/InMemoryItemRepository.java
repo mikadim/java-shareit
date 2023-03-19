@@ -64,15 +64,13 @@ public class InMemoryItemRepository implements ItemRepository {
                         (StringUtils.containsIgnoreCase(item.getName(), prepareTest) || StringUtils
                                 .containsIgnoreCase(item.getDescription(), prepareTest)))
                 .collect(Collectors.toList());
-        if (page.isPaged()) {
-            if (page.getPageNumber() > foundItems.size()) {
-                return new PageImpl<>(new ArrayList<>());
-            } else {
-                return new PageImpl<>(foundItems.subList((int) page.getPageNumber(),
-                        (int) Math.min(page.getPageNumber() + page.getPageSize(), foundItems.size())));
-            }
-        } else {
+        if (!page.isPaged()) {
             return new PageImpl<>(foundItems);
+        } else if (page.getPageNumber() > foundItems.size()) {
+            return new PageImpl<>(new ArrayList<>());
+        } else {
+            return new PageImpl<>(foundItems.subList((int) page.getPageNumber(),
+                    (int) Math.min(page.getPageNumber() + page.getPageSize(), foundItems.size())));
         }
     }
 

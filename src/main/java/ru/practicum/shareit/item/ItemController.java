@@ -43,18 +43,18 @@ public class ItemController {
         return new ResponseEntity<>(itemService.getById(itemId, userId), HttpStatus.OK);
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<ItemDto>> getItems(@RequestHeader(USER_ID_TAG) @NotNull Long userId,
                                                   @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
                                                   @RequestParam(name = "size", required = false) @Positive Integer size) {
-        return new ResponseEntity<>(itemService.getByUserId(userId, from, size), HttpStatus.OK);
+        return new ResponseEntity<>(itemService.getByUserId(userId, from, size).getContent(), HttpStatus.OK);
     }
 
     @GetMapping("search")
     public ResponseEntity<List<ItemDto>> searchItems(@RequestParam("text") String text,
                                                      @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
                                                      @RequestParam(name = "size", required = false) @Positive Integer size) {
-        return new ResponseEntity<>(itemService.getByText(text, from, size), HttpStatus.OK);
+        return new ResponseEntity<>(itemService.getByText(text, from, size).getContent(), HttpStatus.OK);
     }
 
     @PostMapping("/{itemId}/comment")

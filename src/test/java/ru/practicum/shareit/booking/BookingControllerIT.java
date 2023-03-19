@@ -2,12 +2,14 @@ package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -62,15 +64,16 @@ class BookingControllerIT {
                         .accept(MediaType.ALL))
                 .andExpect(status().isBadRequest());
 
-        verify(bookingService, never()).getStatus(any(), any());
+        verify(bookingService, never()).getBooking(any(), any());
     }
 
     @SneakyThrows
+    @DisplayName("Когда владелец брони не найден, статус NotFound и метод getBooking вызывается один раз")
     @Test
-    void getUserRequest_whenRequestorIdNotFound_thenStatusNotFoundAndItemRequestServiceMethodCalledOnlyOnce() {
+    void getUserRequest_whenRequestorIdNotFound() {
         Long bookingId = 1L;
         Long bookerId = 99L;
-        when(bookingService.getStatus(bookerId, bookingId))
+        when(bookingService.getBooking(bookerId, bookingId))
                 .thenThrow(new BookingServiceException("данные не доступны"));
 
         mockMvc.perform(get("/bookings/{bookingId}", bookingId)
@@ -79,7 +82,7 @@ class BookingControllerIT {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("данные не доступны"));
 
-        verify(bookingService, times(1)).getStatus(any(), any());
+        verify(bookingService, times(1)).getBooking(any(), any());
     }
 
     @SneakyThrows
@@ -87,7 +90,7 @@ class BookingControllerIT {
     void getUserRequest_whenCorrectRequest_thenStatusOk() {
         Long bookingId = 1L;
         Long bookerId = 1L;
-        when(bookingService.getStatus(bookerId, bookingId))
+        when(bookingService.getBooking(bookerId, bookingId))
                 .thenReturn(booking);
 
         mockMvc.perform(get("/bookings/{bookingId}", bookingId)
@@ -106,8 +109,8 @@ class BookingControllerIT {
                         jsonPath("$.booker.email", is(booking.getBooker().getEmail())),
                         jsonPath("$.booker.name", is(booking.getBooker().getName())));
 
-        verify(bookingService).getStatus(bookerId, bookingId);
-        verify(bookingService, times(1)).getStatus(any(), any());
+        verify(bookingService).getBooking(bookerId, bookingId);
+        verify(bookingService, times(1)).getBooking(any(), any());
     }
 
     @SneakyThrows
@@ -127,8 +130,9 @@ class BookingControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос возвращает статус ОК и метод updateStatus вызывается один раз")
     @Test
-    void changeBookingStatus_whenCorrectRequest_thenStatusOkAndBookingServiceMethodCalledOnlyOnce() {
+    void changeBookingStatus_whenCorrectRequest() {
         Long ownerId = 1L;
         Long bookingId = 1L;
         Boolean status = Boolean.TRUE;
@@ -189,13 +193,14 @@ class BookingControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос возвращает статус ОК и метод getBookerBookings вызывается один раз")
     @Test
-    void getBookerBookings_whenCorrectRequest_thenStatusOkAndBookingServiceMethodCalledOnlyOnce() {
+    void getBookerBookings_whenCorrectRequest() {
         Long userId = 1L;
         Integer size = 2;
         Integer from = 0;
         BookingStatusDto state = BookingStatusDto.ALL;
-        when(bookingService.getBookerBookings(userId, state, from, size)).thenReturn(List.of(booking, booking2));
+        when(bookingService.getBookerBookings(userId, state, from, size)).thenReturn(new PageImpl<>(List.of(booking, booking2)));
 
         mockMvc.perform(get("/bookings")
                         .header(BOOKER_ID_TAG, userId)
@@ -211,13 +216,14 @@ class BookingControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос возвращает статус ОК и метод getUserBookings вызывается один раз")
     @Test
-    void getUserBookings_whenCorrectRequest_thenStatusOkAndBookingServiceMethodCalledOnlyOnce() {
+    void getUserBookings_whenCorrectRequest() {
         Long userId = 1L;
         Integer size = 2;
         Integer from = 0;
         BookingStatusDto state = BookingStatusDto.ALL;
-        when(bookingService.getUserBookings(userId, state, from, size)).thenReturn(List.of(booking, booking2));
+        when(bookingService.getUserBookings(userId, state, from, size)).thenReturn(new PageImpl<>(List.of(booking, booking2)));
 
         mockMvc.perform(get("/bookings/owner")
                         .header(BOOKER_ID_TAG, userId)
@@ -284,8 +290,9 @@ class BookingControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Корректный запрос возвращает статус ОК и метод create вызывается один раз")
     @Test
-    void crateBooking_whenCorrectRequest_thenStatusOkAndBookingServiceMethodCalledOnlyOnce() {
+    void crateBooking_whenCorrectRequest() {
         Long bookerId = 1L;
         LocalDateTime start = LocalDateTime.parse(booking2.getStart().format(formatter));
         LocalDateTime end = LocalDateTime.parse(booking2.getEnd().format(formatter));

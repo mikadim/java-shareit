@@ -39,7 +39,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public ResponseEntity<Booking> getBookingStatus(@RequestHeader(BOOKER_ID_TAG) @NotNull Long userId,
                                                     @PathVariable("bookingId") Long bookingId) {
-        return new ResponseEntity<>(bookingService.getStatus(userId, bookingId), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getBooking(userId, bookingId), HttpStatus.OK);
     }
 
     @GetMapping
@@ -47,7 +47,7 @@ public class BookingController {
                                                            @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status,
                                                            @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
                                                            @RequestParam(name = "size", required = false) @Positive Integer size) {
-        return new ResponseEntity<>(bookingService.getBookerBookings(userId, status, from, size), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getBookerBookings(userId, status, from, size).getContent(), HttpStatus.OK);
     }
 
     @GetMapping("/owner")
@@ -55,6 +55,6 @@ public class BookingController {
                                                          @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status,
                                                          @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
                                                          @RequestParam(name = "size", required = false) @Positive Integer size) {
-        return new ResponseEntity<>(bookingService.getUserBookings(userId, status, from, size), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getUserBookings(userId, status, from, size).getContent(), HttpStatus.OK);
     }
 }

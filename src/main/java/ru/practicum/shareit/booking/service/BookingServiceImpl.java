@@ -3,10 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatusDto;
@@ -75,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking getStatus(Long userId, Long bookingId) {
+    public Booking getBooking(Long userId, Long bookingId) {
         return bookingRepository
                 .findByIdAndBookerIdAndItemOwner(bookingId, userId)
                 .orElseGet(() -> {
@@ -84,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookerBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
+    public Page<Booking> getBookerBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
         userRepository.getById(userId);
         Pageable page;
         if (size == null || from == null) {
@@ -94,13 +91,12 @@ public class BookingServiceImpl implements BookingService {
             page = PageRequest.of(from / size, size, sortByCreated);
         }
         Page<Booking> bookingPage = bookingRepository.findByBookerId(userId, page);
-        List<Booking> bookings = new ArrayList<>();
-        bookingPage.getContent().forEach(bookings::add);
-        return getBookings(status, bookings);
+        List<Booking> bookings = getBookings(status, bookingPage.getContent());
+        return new PageImpl<>(bookings);
     }
 
     @Override
-    public List<Booking> getUserBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
+    public Page<Booking> getUserBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
         userRepository.getById(userId);
 
         Pageable page;
@@ -111,9 +107,8 @@ public class BookingServiceImpl implements BookingService {
             page = PageRequest.of(from / size, size, sortByCreated);
         }
         Page<Booking> bookingPage = bookingRepository.findByItemOwner(userId, page);
-        List<Booking> bookings = new ArrayList<>();
-        bookingPage.getContent().forEach(bookings::add);
-        return getBookings(status, bookings);
+        List<Booking> bookings = getBookings(status, bookingPage.getContent());
+        return new PageImpl<>(bookings);
     }
 
     private static List<Booking> getBookings(BookingStatusDto status, List<Booking> bookings) {

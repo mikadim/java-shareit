@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -106,8 +107,9 @@ class UserControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Post запрос с некорректным body возвращает статус BadRequest и метод create не вызывается")
     @Test
-    void createUser_whenDtoIsNull_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled() {
+    void createUser_whenDtoIsNull() {
         mockMvc.perform(post("/users")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,8 +120,9 @@ class UserControllerIT {
     }
 
     @SneakyThrows
+    @DisplayName("Email с некорректным форматом возвращает статус BadRequest и метод create не вызывается")
     @Test
-    void createUser_whenEmailIncorrect_thenStatusBadRequestAndItemRequestServiceMethodNeverCalled() {
+    void createUser_whenEmailIncorrect() {
         UserDto newDto = new UserDto(3L, "abrakadabra", "user");
 
         mockMvc.perform(post("/users")
