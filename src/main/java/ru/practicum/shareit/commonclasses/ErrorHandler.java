@@ -9,6 +9,8 @@ import ru.practicum.shareit.item.ItemController;
 import ru.practicum.shareit.item.exception.CommentServiceException;
 import ru.practicum.shareit.item.exception.ItemRepositoryException;
 import ru.practicum.shareit.item.exception.ItemServiceException;
+import ru.practicum.shareit.request.ItemRequestController;
+import ru.practicum.shareit.request.exception.ItemRequestServiceException;
 import ru.practicum.shareit.user.UserController;
 import ru.practicum.shareit.user.exception.UserRepositoryException;
 import ru.practicum.shareit.user.exception.UserServiceException;
@@ -17,12 +19,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
 import java.util.Map;
 
 
 @Slf4j
-@ControllerAdvice(assignableTypes = {ItemController.class, UserController.class, BookingController.class})
+@ControllerAdvice(assignableTypes = {ItemController.class, UserController.class, BookingController.class,
+        ItemRequestController.class})
 class ErrorHandler {
 
     @ExceptionHandler(UserRepositoryException.class)
@@ -84,5 +88,18 @@ class ErrorHandler {
         log.debug(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ItemRequestServiceException.class)
+    public ResponseEntity<String> itemRequestServiceHandler(final RuntimeException e) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<String> constraintViolationHandler(final RuntimeException e) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
 }
 

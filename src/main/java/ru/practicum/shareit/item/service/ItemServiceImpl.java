@@ -5,6 +5,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -81,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
     private void prepareDto(Long itemId, Long userId, ItemDto itemDto) {
         List<Booking> itemBooking = bookingRepository.findByItemIdAndItemOwner(itemId, userId);
         itemBooking.stream()
-                .filter(i -> i.getEnd().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
+                .filter(i -> i.getStart().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
                 .max(Comparator.comparing(Booking::getEnd))
                 .ifPresent(lastBooking -> itemDto.setLastBooking(bookingMapper.toBookingItemDto(lastBooking)));
         itemBooking.stream()
@@ -92,22 +93,38 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getByUserId(Long userId) {
-        List<ItemDto> itemDtos = itemMapper.toDtoItems(itemRepository.getByUserId(userId));
+    public Page<ItemDto> getByUserId(Long userId, Integer from, Integer size) {
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortById = Sort.by(Sort.Direction.ASC, "id");
+            page = PageRequest.of(from / size, size, sortById);
+        }
+        Page<Item> itemPage = itemRepository.getByUserId(userId, page);
+        List<ItemDto> itemDtos = itemMapper.toDtoItems(itemPage.getContent());
         for (ItemDto dto : itemDtos) {
             prepareDto(dto.getId(), userId, dto);
         }
-        return itemDtos.stream()
+        return new PageImpl<>(itemDtos.stream()
                 .sorted(Comparator.comparing(ItemDto::getId))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
-    public List<ItemDto> getByText(String text) {
+    public Page<ItemDto> getByText(String text, Integer from, Integer size) {
         if (text.isBlank()) {
-            return new ArrayList<>();
+            return new PageImpl<>(new ArrayList<>());
         }
-        return itemMapper.toDtoItems(itemRepository.getByText(text));
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortById = Sort.by(Sort.Direction.ASC, "id");
+            page = PageRequest.of(from / size, size, sortById);
+        }
+        Page<Item> itemPage = itemRepository.getByText(text, page);
+        return new PageImpl<>(itemMapper.toDtoItems(itemPage.getContent()));
     }
 
     @Override

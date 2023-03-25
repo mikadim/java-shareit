@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatusDto;
@@ -71,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking getStatus(Long userId, Long bookingId) {
+    public Booking getBooking(Long userId, Long bookingId) {
         return bookingRepository
                 .findByIdAndBookerIdAndItemOwner(bookingId, userId)
                 .orElseGet(() -> {
@@ -80,17 +81,34 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookerBookings(Long userId, BookingStatusDto status) {
+    public Page<Booking> getBookerBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
         userRepository.getById(userId);
-        List<Booking> bookings = bookingRepository.findByBookerId(userId);
-        return getBookings(status, bookings);
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortByCreated = Sort.by(Sort.Direction.DESC, "start");
+            page = PageRequest.of(from / size, size, sortByCreated);
+        }
+        Page<Booking> bookingPage = bookingRepository.findByBookerId(userId, page);
+        List<Booking> bookings = getBookings(status, bookingPage.getContent());
+        return new PageImpl<>(bookings);
     }
 
     @Override
-    public List<Booking> getUserBookings(Long userId, BookingStatusDto status) {
+    public Page<Booking> getUserBookings(Long userId, BookingStatusDto status, Integer from, Integer size) {
         userRepository.getById(userId);
-        List<Booking> bookings = bookingRepository.findByItemOwner(userId);
-        return getBookings(status, bookings);
+
+        Pageable page;
+        if (size == null || from == null) {
+            page = Pageable.unpaged();
+        } else {
+            Sort sortByCreated = Sort.by(Sort.Direction.DESC, "start");
+            page = PageRequest.of(from / size, size, sortByCreated);
+        }
+        Page<Booking> bookingPage = bookingRepository.findByItemOwner(userId, page);
+        List<Booking> bookings = getBookings(status, bookingPage.getContent());
+        return new PageImpl<>(bookings);
     }
 
     private static List<Booking> getBookings(BookingStatusDto status, List<Booking> bookings) {

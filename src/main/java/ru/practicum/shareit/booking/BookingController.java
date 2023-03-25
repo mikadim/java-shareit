@@ -11,6 +11,8 @@ import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Validated
@@ -34,21 +36,25 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.updateStatus(ownerId, bookingId, status), HttpStatus.OK);
     }
 
-    @GetMapping("{bookingId}")
+    @GetMapping("/{bookingId}")
     public ResponseEntity<Booking> getBookingStatus(@RequestHeader(BOOKER_ID_TAG) @NotNull Long userId,
                                                     @PathVariable("bookingId") Long bookingId) {
-        return new ResponseEntity<>(bookingService.getStatus(userId, bookingId), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getBooking(userId, bookingId), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<List<Booking>> getBookerBookings(@RequestHeader(BOOKER_ID_TAG) @NotNull Long userId,
-                                                         @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status) {
-        return new ResponseEntity<>(bookingService.getBookerBookings(userId, status), HttpStatus.OK);
+                                                           @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status,
+                                                           @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                                           @RequestParam(name = "size", required = false) @Positive Integer size) {
+        return new ResponseEntity<>(bookingService.getBookerBookings(userId, status, from, size).getContent(), HttpStatus.OK);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<Booking>> getUserBookings(@RequestHeader(BOOKER_ID_TAG) @NotNull Long userId,
-                                                             @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status) {
-        return new ResponseEntity<>(bookingService.getUserBookings(userId, status), HttpStatus.OK);
+                                                         @RequestParam(value = "state", defaultValue = "ALL") BookingStatusDto status,
+                                                         @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                                         @RequestParam(name = "size", required = false) @Positive Integer size) {
+        return new ResponseEntity<>(bookingService.getUserBookings(userId, status, from, size).getContent(), HttpStatus.OK);
     }
 }

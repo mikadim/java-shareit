@@ -4,6 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.exception.ItemRepositoryException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -36,20 +39,44 @@ public class InMemoryItemRepository implements ItemRepository {
     }
 
     @Override
-    public List<Item> getByUserId(Long userId) {
-        return items.values().stream()
+    public Page<Item> getByUserId(Long userId, Pageable page) {
+        List<Item> allUserItems = items.values().stream()
                 .filter(i -> Objects.equals(i.getOwner(), userId))
+                .sorted(Comparator.comparing(Item::getId).reversed())
                 .collect(Collectors.toList());
+        if (page.isPaged()) {
+            if (page.getPageNumber() > allUserItems.size()) {
+                return new PageImpl<>(new ArrayList<>());
+            } else {
+                return new PageImpl<>(allUserItems.subList((int) page.getPageNumber(),
+                        (int) Math.min(page.getPageNumber() + page.getPageSize(), allUserItems.size())));
+            }
+        } else {
+            return new PageImpl<>(allUserItems);
+        }
     }
 
     @Override
-    public List<Item> getByText(String text) {
+    public Page<Item> getByText(String text, Pageable page) {
         final String prepareTest = text.trim();
-        return items.values().stream()
+        List<Item> foundItems = items.values().stream()
                 .filter(item -> item.getAvailable().equals(true) &&
                         (StringUtils.containsIgnoreCase(item.getName(), prepareTest) || StringUtils
                                 .containsIgnoreCase(item.getDescription(), prepareTest)))
                 .collect(Collectors.toList());
+        if (!page.isPaged()) {
+            return new PageImpl<>(foundItems);
+        } else if (page.getPageNumber() > foundItems.size()) {
+            return new PageImpl<>(new ArrayList<>());
+        } else {
+            return new PageImpl<>(foundItems.subList((int) page.getPageNumber(),
+                    (int) Math.min(page.getPageNumber() + page.getPageSize(), foundItems.size())));
+        }
+    }
+
+    @Override
+    public List<Item> getByRequest(Long requestId) {
+        return null;
     }
 
     @Override

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.mapper;
 
 import org.mapstruct.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.lang.annotation.ElementType;
@@ -21,6 +22,8 @@ public interface ItemMapper {
     @Mapping(target = "description", qualifiedBy = BlankStringToNull.class)
     @Mapping(target = "name", qualifiedBy = BlankStringToNull.class)
     void updateItem(Item item, @MappingTarget Item itemForUpdate);
+
+    List<ItemForItemRequestDto> toItemForItemRequestDto(List<Item> items);
 
     @BlankStringToNull
     default String blankStringToNull(String s) {

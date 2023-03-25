@@ -3,6 +3,8 @@ package ru.practicum.shareit.item.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.exception.ItemRepositoryException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -11,10 +13,6 @@ import ru.practicum.shareit.user.exception.UserRepositoryException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.List;
 
 @Slf4j
@@ -63,23 +61,17 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public List<Item> getByUserId(Long userId) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery criteriaQuery = cb.createQuery();
-        Root<Item> root = criteriaQuery.from(Item.class);
-        criteriaQuery.select(root).where(cb.equal(root.get("owner"), userId));
-        return entityManager.createQuery(criteriaQuery).getResultList();
+    public Page<Item> getByUserId(Long userId, Pageable page) {
+        return itemRepositoryJpa.findByOwner(userId, page);
     }
 
     @Override
-    public List<Item> getByText(String text) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Item> criteriaQuery = cb.createQuery(Item.class);
-        Root<Item> root = criteriaQuery.from(Item.class);
-        Predicate available = cb.isTrue(root.get("available"));
-        Predicate likeText = cb.or((cb.like(cb.lower(root.get("name")), "%" + text.toLowerCase() + "%")),
-                (cb.like(cb.lower(root.get("description")), "%" + text.toLowerCase() + "%")));
-        criteriaQuery.select(root).where(cb.and(available, likeText));
-        return entityManager.createQuery(criteriaQuery).getResultList();
+    public Page<Item> getByText(String text, Pageable page) {
+        return itemRepositoryJpa.getByText(text.toLowerCase(), page);
+    }
+
+    @Override
+    public List<Item> getByRequest(Long requestId) {
+        return itemRepositoryJpa.findByRequestId(requestId);
     }
 }
