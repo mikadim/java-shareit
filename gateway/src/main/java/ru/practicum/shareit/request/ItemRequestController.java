@@ -45,8 +45,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getAllRequest(@RequestHeader(REQUESTOR_ID_TAG) @NotNull @Positive Long requestorId,
-                                                @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
-                                                @RequestParam(name = "size", required = false) @Positive Integer size) {
+                                                @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
+                                                @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
         log.info("Получить все запросы с {}, размер страницы {}", from, size);
         return requestClient.getAll(requestorId, from, size);
     }
