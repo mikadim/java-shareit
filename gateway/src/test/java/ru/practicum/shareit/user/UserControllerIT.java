@@ -30,9 +30,6 @@ class UserControllerIT {
     @MockBean
     private UserClient userClient;
 
-    private UserDto userDto = new UserDto(1L, "user@mail.ru", "testUser");
-    private UserDto userDto2 = new UserDto(2L, "user2@mail.ru", "testUser2");
-
     @SneakyThrows
     @DisplayName("Post запрос с некорректным body возвращает статус BadRequest и метод create не вызывается")
     @Test
