@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,7 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.core.Is.is;
 
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.practicum.shareit.booking.BookingController.BOOKER_ID_TAG;
 import static ru.practicum.shareit.item.model.ItemStatus.APPROVED;
@@ -55,17 +52,6 @@ class BookingControllerIT {
     private Booking booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), item, booker, APPROVED);
     private Booking booking2 = new Booking(2L, LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4), item, booker, APPROVED);
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
-    @SneakyThrows
-    @Test
-    void getBookingStatus_whenBookerIdHeaderIsNotExist_thenStatusBadRequest() {
-        Long bookingId = 1L;
-        mockMvc.perform(get("/bookings/{bookingId}", bookingId)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).getBooking(any(), any());
-    }
 
     @SneakyThrows
     @DisplayName("Когда владелец брони не найден, статус NotFound и метод getBooking вызывается один раз")
@@ -114,22 +100,6 @@ class BookingControllerIT {
     }
 
     @SneakyThrows
-    @Test
-    void changeBookingStatus_whenParamBookingStatusIsNotExist_thenBadRequestResponse() {
-        Long ownerId = 1L;
-        Long bookingId = 1L;
-
-        mockMvc.perform(patch("/bookings/{bookingId}", bookingId)
-                        .header(BOOKER_ID_TAG, ownerId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).updateStatus(any(), any(), any());
-    }
-
-    @SneakyThrows
     @DisplayName("Корректный запрос возвращает статус ОК и метод updateStatus вызывается один раз")
     @Test
     void changeBookingStatus_whenCorrectRequest() {
@@ -152,44 +122,6 @@ class BookingControllerIT {
                         jsonPath("$.booker.length()", is(3)));
 
         verify(bookingService, times(1)).updateStatus(any(), any(), any());
-    }
-
-    @ParameterizedTest(name = "{index}. size = {arguments} ")
-    @ValueSource(strings = {"0", "-1"})
-    @SneakyThrows
-    void getBookerBookings_whenParameterSizeIsInvalid_thenStatusBadRequest(String size) {
-        Long userId = 1L;
-        String from = "0";
-        BookingStatusDto state = BookingStatusDto.ALL;
-
-        mockMvc.perform(get("/bookings")
-                        .header(BOOKER_ID_TAG, userId)
-                        .param("state", state.toString())
-                        .param("from", from)
-                        .param("size", size)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).getBookerBookings(any(), any(), any(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void getBookerBookings_whenParameterFromIsInvalid_thenStatusBadRequest() {
-        Long userId = 1L;
-        String size = "2";
-        String from = "-1";
-        BookingStatusDto state = BookingStatusDto.ALL;
-
-        mockMvc.perform(get("/bookings")
-                        .header(BOOKER_ID_TAG, userId)
-                        .param("state", state.toString())
-                        .param("from", from)
-                        .param("size", size)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).getBookerBookings(any(), any(), any(), any());
     }
 
     @SneakyThrows
@@ -236,57 +168,6 @@ class BookingControllerIT {
                         jsonPath("$.length()", is(2)));
 
         verify(bookingService, times(1)).getUserBookings(any(), any(), any(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void crateBooking_whenStarInPast_thenStatusBadRequest() {
-        Long bookerId = 1L;
-        BookingDto bookingDto = new BookingDto(1L, LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1));
-
-        mockMvc.perform(post("/bookings")
-                        .content(objectMapper.writeValueAsString(bookingDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL)
-                        .header(REQUESTOR_ID_TAG, bookerId))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).create(bookingDto, bookerId);
-    }
-
-    @SneakyThrows
-    @Test
-    void crateBooking_whenStarLaterThenEnd_thenStatusBadRequest() {
-        Long bookerId = 1L;
-        BookingDto bookingDto = new BookingDto(1L, LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(1));
-
-        mockMvc.perform(post("/bookings")
-                        .content(objectMapper.writeValueAsString(bookingDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL)
-                        .header(REQUESTOR_ID_TAG, bookerId))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).create(bookingDto, bookerId);
-    }
-
-    @SneakyThrows
-    @Test
-    void crateBooking_whenEndInPast_thenStatusBadRequest() {
-        Long bookerId = 1L;
-        BookingDto bookingDto = new BookingDto(1L, LocalDateTime.now().plusDays(5), LocalDateTime.now().minusDays(1));
-
-        mockMvc.perform(post("/bookings")
-                        .content(objectMapper.writeValueAsString(bookingDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL)
-                        .header(REQUESTOR_ID_TAG, bookerId))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).create(bookingDto, bookerId);
     }
 
     @SneakyThrows
