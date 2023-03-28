@@ -189,7 +189,7 @@ class ItemControllerIT {
 
         verify(itemService, times(1)).createComment(any(), any(), any());
     }
-    
+
     @SneakyThrows
     @Test
     void createItem_whenCorrectRequest_thenStatusOk() {
