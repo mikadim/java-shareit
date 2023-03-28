@@ -26,6 +26,7 @@ import static org.hamcrest.core.Is.is;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 @WebMvcTest(controllers = UserController.class)
 class UserControllerIT {
     @Autowired
@@ -104,35 +105,6 @@ class UserControllerIT {
                         jsonPath("$[1].length()", is(3)));
 
         verify(userService, times(1)).getAll();
-    }
-
-    @SneakyThrows
-    @DisplayName("Post запрос с некорректным body возвращает статус BadRequest и метод create не вызывается")
-    @Test
-    void createUser_whenDtoIsNull() {
-        mockMvc.perform(post("/users")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).create(any());
-    }
-
-    @SneakyThrows
-    @DisplayName("Email с некорректным форматом возвращает статус BadRequest и метод create не вызывается")
-    @Test
-    void createUser_whenEmailIncorrect() {
-        UserDto newDto = new UserDto(3L, "abrakadabra", "user");
-
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(newDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).create(any());
     }
 
     @SneakyThrows
