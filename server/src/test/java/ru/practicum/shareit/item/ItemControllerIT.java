@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -55,16 +53,6 @@ class ItemControllerIT {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     private DateTimeFormatter formatterForComments = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS");
 
-    @SneakyThrows
-    @Test
-    void getItem_whenRequestorIdHeaderIsNotExist_thenStatusBadRequest() {
-        Long itemId = 1L;
-        mockMvc.perform(get("/items/{id}", itemId)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).getById(any(), any());
-    }
 
     @SneakyThrows
     @Test
@@ -119,41 +107,6 @@ class ItemControllerIT {
                         jsonPath("$.requestId", is(itemDto.getRequestId()), Long.class));
 
         verify(itemService, times(1)).getById(any(), any());
-    }
-
-
-    @ParameterizedTest(name = "{index}. size = {arguments} ")
-    @ValueSource(strings = {"0", "-1"})
-    @SneakyThrows
-    void getItems_whenParameterSizeIsInvalid_thenStatusBadRequest(String size) {
-        Long userId = 1L;
-        String from = "0";
-
-        mockMvc.perform(get("/items")
-                        .header(USER_ID_TAG, userId)
-                        .param("from", from)
-                        .param("size", size)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).getByUserId(any(), any(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void getItems_whenParameterFromIsInvalid_thenStatusBadRequest() {
-        Long userId = 1L;
-        String size = "2";
-        String from = "-1";
-
-        mockMvc.perform(get("/items")
-                        .header(USER_ID_TAG, userId)
-                        .param("from", from)
-                        .param("size", size)
-                        .accept(MediaType.ALL))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).getByUserId(any(), any(), any());
     }
 
     @SneakyThrows
@@ -216,41 +169,6 @@ class ItemControllerIT {
         verify(itemService, times(1)).getByText(any(), any(), any());
     }
 
-    @ParameterizedTest(name = "{index}. text = {arguments} ")
-    @ValueSource(strings = {"", " "})
-    @SneakyThrows
-    void createComment_whenIncorrectObject_thenStatusIsBadRequest(String text) {
-        Long authorId = 1L;
-        Long itemId = 1L;
-        CommentDto commentDto = new CommentDto(2L, text, "testUser", LocalDateTime.now());
-
-        mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                        .content(objectMapper.writeValueAsString(commentDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL)
-                        .header(USER_ID_TAG, authorId))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).createComment(any(), any(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void createComment_whenObjectIsNotExist_thenStatusIsBadRequest() {
-        Long authorId = 1L;
-        Long itemId = 1L;
-
-        mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.ALL)
-                        .header(USER_ID_TAG, authorId))
-                .andExpect(status().isBadRequest());
-
-        verify(itemService, never()).createComment(any(), any(), any());
-    }
-
     @SneakyThrows
     @DisplayName("Post запрос с корректным body возвращает статус ОК и метод createComment вызывается один раз")
     @Test
@@ -271,8 +189,7 @@ class ItemControllerIT {
 
         verify(itemService, times(1)).createComment(any(), any(), any());
     }
-
-
+    
     @SneakyThrows
     @Test
     void createItem_whenCorrectRequest_thenStatusOk() {

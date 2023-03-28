@@ -20,7 +20,7 @@ import javax.validation.constraints.PositiveOrZero;
 @Slf4j
 @RequiredArgsConstructor
 public class ItemController {
-    private static final String USER_ID_TAG = "X-Sharer-User-Id";
+    static final String USER_ID_TAG = "X-Sharer-User-Id";
     private final ItemClient itemClient;
 
     @PostMapping
